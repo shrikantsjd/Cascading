@@ -1,0 +1,102 @@
+﻿@model Cascading.Models.CascadingViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<h4>CascadingViewModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Index">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Country" class="control-label"></label>
+                 <select class="form-select" id="ddlCountry" asp-for="Country" >
+            <option>--Select--</option>
+        </select>
+
+                
+                <span asp-validation-for="Country" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="City" class="control-label"></label>
+                 <select class="form-select" id="ddlCity" asp-for="City" >
+            <option>--Select--</option>
+        </select>
+
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var ddlCountry = $("#ddlCountry");
+            var i = 0;
+
+            ddlCountry.empty().append('<option selected="selected" value="0" disabled = "disabled">Loading.....</option>');
+            $.ajax({
+                type: "Get",
+                url: "Country.json",
+                data: '{}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    ddlCountry.empty().append('<option selected="selected" value="0">Please select</option>');
+                    $.each(response, function () {
+                      ddlCountry.append($("<option></option>").val(response[i].country).html(response[i].country));
+                      i++;
+                    });
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        });
+
+$("#ddlCountry").change(function() {
+    //alert($('#ddlCountry').val());
+    var ddlCity = $("#ddlCity");
+    var ddlCountry = $('#ddlCountry').val();
+            var i = 0;
+
+            ddlCity.empty().append('<option selected="selected" value="0" disabled = "disabled">Loading.....</option>');
+            $.ajax({
+                type: "Get",
+                url: "CountryCity.json",
+                data: { Country: ddlCountry },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    let filterKey = ddlCountry;
+                    var  result = Object.entries(response).filter(([k, v]) => k== filterKey)[0][1];
+                   // alert(result);
+
+                    ddlCity.empty().append('<option selected="selected" value="0">Please select</option>');
+                    $.each(result, function () {
+                      ddlCity.append($("<option></option>").val(result[i]).html(result[i]));
+                      i++;
+                    });
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+});
+    </script>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
